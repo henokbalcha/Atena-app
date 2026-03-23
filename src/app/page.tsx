@@ -2,16 +2,32 @@ import { supabase } from "@/lib/supabaseClient";
 import { SearchBar } from "./search-bar";
 import { BentoGridApps } from "./bento-grid-apps";
 import { AppCategoryNav } from "./app-category-nav";
+import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
-import { DownloadIcon, UserIcon } from "lucide-react";
+import { UserIcon } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  const { data: apps, error } = await supabase
+export default async function Home({ searchParams }: { searchParams: Promise<{ type?: string, search?: string }> }) {
+  const { type, search } = await searchParams;
+
+  // Fetch User
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let query = supabase
     .from('apps')
     .select('*')
     .order('created_at', { ascending: false });
+
+  if (type) {
+    query = query.eq('type', type);
+  }
+
+  if (search) {
+     query = query.ilike('title', `%${search}%`);
+  }
+
+  const { data: apps, error } = await query;
 
   if (error) {
     console.error("Error fetching apps", error);
@@ -20,73 +36,100 @@ export default async function Home() {
   const allApps = apps || [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-32">
-      {/* Global Navigation - Floating Glass */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 glass rounded-full px-6 py-3 flex items-center justify-between shadow-[0_0_30px_-10px_theme('colors.blue.500/0.3')]">
-        <div className="flex items-center gap-6">
+    <div className="min-h-screen liquid-bg overflow-x-hidden pb-40 transition-colors duration-500">
+      
+      {/* Liquid Blurs Decorative Background */}
+      <div className="fixed top-[-20%] left-[-20%] liquid-glow animate-pulse"></div>
+      <div className="fixed bottom-[-20%] right-[-20%] liquid-glow animate-pulse opacity-20" style={{ background: 'radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%)' }}></div>
+
+      {/* Navigation - High Contrast Athena Design */}
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 glass-apple rounded-[2.5rem] px-10 py-5 flex items-center justify-between border-black/5 dark:border-white/10 shadow-xl">
+        <div className="flex items-center gap-12">
           <Link href="/">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent transform hover:scale-105 transition-transform duration-200">
-              Nexus Store
+            <h1 className="text-2xl font-bold tracking-tighter dark:text-white text-black hover:opacity-80 transition-opacity uppercase italic">
+              ATHENA APP
             </h1>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
-            <Link href="/" className="hover:text-white transition-colors">Discover</Link>
-            <Link href="/arcade" className="hover:text-white transition-colors">Arcade</Link>
-            <Link href="/create" className="hover:text-white transition-colors text-blue-400">Publish App</Link>
+          <div className="hidden md:flex items-center gap-10 text-[10px] font-black uppercase tracking-[0.4em]">
+            <Link href="/?type=app" className={`transition-colors duration-300 ${type === 'app' ? 'dark:text-white text-black border-b-2 border-accent-blue/60 pb-1' : 'dark:text-white/40 text-black/40 hover:text-black dark:hover:text-white'}`}>APPs</Link>
+            <Link href="/?type=game" className={`transition-colors duration-300 ${type === 'game' ? 'dark:text-white text-black border-b-2 border-accent-blue/60 pb-1' : 'dark:text-white/40 text-black/40 hover:text-black dark:hover:text-white'}`}>GAMEs</Link>
+            <Link href="/publish" className="text-accent-blue hover:scale-105 transition-all font-bold">DEPLOY [+].</Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:block">
-            <SearchBar />
+        <div className="flex items-center gap-8">
+           <ThemeToggle />
+           <div className="flex items-center gap-10 text-[10px] font-black tracking-[0.3em] uppercase">
+            {user ? (
+               <Link href="/dashboard" className="dark:text-black text-white dark:bg-white bg-black px-6 py-3 rounded-full hover:scale-105 transition-all shadow-lg">DASHBOARD</Link>
+            ) : (
+               <Link href="/login" className="dark:text-white/40 text-black/60 hover:dark:text-white hover:text-black transition-colors">LOGIN_CIPHER</Link>
+            )}
           </div>
-          <Link href="/dashboard" className="h-10 w-10 glass rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
-            <UserIcon size={18} className="text-slate-300" />
-          </Link>
         </div>
       </nav>
 
-      <main className="pt-32 px-4 max-w-7xl mx-auto flex flex-col gap-12">
-        {/* Hero Section */}
-        <section className="text-center py-10 md:py-20 flex flex-col items-center">
-          <div className="inline-flex glass rounded-full px-4 py-1.5 mb-6 text-xs font-semibold text-blue-400 border-blue-500/30">
-            <span className="animate-pulse mr-2 rounded-full h-2 w-2 bg-blue-500 inline-block"></span>
-            Welcome to the Future of Apps
+      <main className="pt-48 px-6 max-w-7xl mx-auto flex flex-col gap-24">
+        
+        {/* HERO SECTION - REFINED CONTRAST */}
+        <section className="text-center py-24 flex flex-col items-center relative">
+          <div className="inline-flex glass-apple rounded-full px-8 py-3 mb-10 text-[10px] font-black dark:text-white/40 text-black/60 border-black/5 dark:border-white/10 tracking-[0.5em] uppercase shadow-sm">
+            {type === 'game' ? 'EXPLORE TOP TITLES' : 'EXPLORE TOP UTILITIES'}
           </div>
-          <h2 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-br from-white via-cyan-100 to-blue-500 bg-clip-text text-transparent filter drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-            Discover What's Next
+          
+          <h2 className="text-6xl md:text-[8rem] font-bold tracking-tighter mb-10 leading-[0.85] text-premium filter drop-shadow-2xl">
+            {type === 'game' ? 'PLAY. DISCOVER.' : 'TOOLS. REFINED.'}<br/>
+            {type === 'app' ? 'LATEST APPS.' : 'NEW GAMES.'}
           </h2>
-          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">
-            A curated collection of the most powerful, beautiful, and innovative mobile applications. 
-            Downloaded at the speed of light.
+          
+          <p className="text-lg md:text-xl dark:text-white/30 text-black/50 max-w-3xl mx-auto mb-20 font-medium leading-relaxed italic tracking-wide">
+            The world&apos;s most innovative {type === 'game' ? 'interactive' : 'digital'} experiences, now presented through a lens of absolute clarity and precision.
           </p>
-          <div className="flex gap-4">
-            <button className="bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 py-3 font-semibold transition-all hover:shadow-[0_0_20px_-5px_theme('colors.blue.500')] active:scale-95">
-              Explore Top Charts
-            </button>
-            <button className="glass hover:bg-white/10 text-white rounded-full px-8 py-3 font-semibold transition-all active:scale-95">
-              Admin Portal
-            </button>
+
+          <div className="flex gap-8">
+            <Link href="/?type=app" className="btn-apple">View All Apps</Link>
+            <Link href="/?type=game" className="btn-apple-glass">Explore Gaming</Link>
           </div>
         </section>
 
-        {/* Categories Pills */}
-        <section className="sticky top-24 z-40 bg-slate-950/80 backdrop-blur-md py-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <AppCategoryNav categories={['All', 'Productivity', 'Games', 'Finance', 'Social', 'AI Tools', 'Creativity']} />
+        {/* Categories Select */}
+        <section className="sticky top-28 z-40">
+           <AppCategoryNav categories={['All', 'Entertainment', 'Productivity', 'Finance', 'Social', 'AI Tools', 'Creativity']} />
         </section>
 
         {/* Bento Grid Featured Layout */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold">Featured Editor's Choice</h3>
-            <button className="text-blue-400 hover:text-blue-300 font-medium text-sm flex items-center gap-1 group">
-              See all <span className="transform group-hover:translate-x-1 transition-transform">→</span>
-            </button>
+        <section id="artifact-grid">
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+            <div>
+               <h3 className="text-5xl font-bold tracking-tight mb-3 uppercase italic dark:text-white text-black">
+                 {type === 'game' ? 'GAMEs' : 'APPs'} PORTAL
+               </h3>
+               <p className="text-[10px] font-black dark:text-white/20 text-black/30 uppercase tracking-[0.6em] italic">Network_Verified_Artifacts</p>
+            </div>
+            <div className="flex items-center gap-8 w-full md:w-auto">
+               <SearchBar />
+            </div>
           </div>
           
           <BentoGridApps apps={allApps} />
         </section>
+
       </main>
+
+      {/* Footer - Solid Contrast */}
+      <footer className="py-24 border-t border-black/10 dark:border-white/5 mt-40">
+         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-12">
+            <div className="flex flex-col gap-3">
+               <span className="text-2xl font-bold italic uppercase tracking-tighter dark:text-white text-black">ATHENA_APP_NETWORK</span>
+               <span className="text-[9px] font-black dark:text-white/10 text-black/20 uppercase tracking-[0.4em] leading-none">© 2026 ATHENA_PROTOCOL. ALL_RIGHTS_PROTECTED.</span>
+            </div>
+            <div className="flex gap-12 text-[10px] font-black uppercase tracking-[0.4em] dark:text-white/20 text-black/30">
+               <Link href="#" className="hover:text-accent-blue dark:hover:text-white transition-colors">Protocol</Link>
+               <Link href="#" className="hover:text-accent-blue dark:hover:text-white transition-colors">Manifesto</Link>
+               <Link href="#" className="hover:text-accent-blue dark:hover:text-white transition-colors">Privacy_Cipher</Link>
+            </div>
+         </div>
+      </footer>
     </div>
   );
 }

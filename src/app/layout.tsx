@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProviders } from "./theme-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hena App Store - Premium Android Apps",
-  description: "Discover and download the best Android applications and games.",
+  title: "Athena App Store | Premium Digital Portal",
+  description: "The world's most innovative applications, refined through a lens of absolute clarity and precision.",
 };
 
 export default function RootLayout({
@@ -23,9 +24,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${geistMono.variable} antialiased selection:bg-accent-blue/30 selection:text-white bg-white dark:bg-black transition-colors duration-500`}
+      >
+        <ThemeProviders>
+          <div className="min-h-screen relative">
+            {children}
+          </div>
+        </ThemeProviders>
       </body>
     </html>
   );
