@@ -2,7 +2,7 @@
 
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
-import { DownloadIcon, ZapIcon, Star } from "lucide-react";
+import { ZapIcon, Star, PackageSearch } from "lucide-react";
 
 export function BentoGridApps({ apps }: { apps: any[] }) {
   const container: Variants = {
@@ -20,12 +20,15 @@ export function BentoGridApps({ apps }: { apps: any[] }) {
     show: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 30 } }
   };
 
-  const mockFeatured = [
-    { id: '00000000-0000-0000-0000-000000000001', title: 'Athena Core', category: 'Productivity', type: 'app', rating: 4.8, description: 'Sleek utility for modern workflows.' },
-    { id: '00000000-0000-0000-0000-000000000002', title: 'Cyber Quest', category: 'Entertainment', type: 'game', rating: 4.9, description: 'An immersive arcade experience.' }
-  ];
-
-  const displayApps = apps.length > 0 ? apps : mockFeatured;
+  if (apps.length === 0) {
+    return (
+       <div className="w-full py-32 flex flex-col items-center justify-center text-center opacity-30 select-none">
+          <PackageSearch size={64} className="mb-6 opacity-20" />
+          <h4 className="text-xl font-black uppercase tracking-[0.5em] italic">No_Artifacts_Found</h4>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-2 italic">Waiting for network deployment...</p>
+       </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -34,7 +37,7 @@ export function BentoGridApps({ apps }: { apps: any[] }) {
       animate="show"
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20"
     >
-      {displayApps.map((app, i) => {
+      {apps.map((app, i) => {
         return (
           <motion.div key={app.id || i} variants={item} className="h-[380px]">
             <Link href={`/app/${app.id}`} className="glass-apple-card block w-full h-full relative overflow-hidden group shadow-lg dark:shadow-2xl border-black/5 dark:border-white/5 hover:border-accent-blue/40 transition-all duration-300">
